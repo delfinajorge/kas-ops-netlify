@@ -116,7 +116,7 @@ textarea{resize:vertical;min-height:75px;line-height:1.6;}
     <button class="nav-btn" onclick="showTab('config',this)">Configuración</button>
   </div>
   <div class="main">
-
+ 
     <!-- DASHBOARD -->
     <div class="tab active" id="tab-dashboard">
       <div class="metrics">
@@ -140,7 +140,7 @@ textarea{resize:vertical;min-height:75px;line-height:1.6;}
         </div>
       </div>
     </div>
-
+ 
     <!-- NUEVO TICKET -->
     <div class="tab" id="tab-nuevo">
       <div class="form-card">
@@ -175,7 +175,7 @@ textarea{resize:vertical;min-height:75px;line-height:1.6;}
         </div>
       </div>
     </div>
-
+ 
     <!-- HISTORIAL -->
     <div class="tab" id="tab-historial">
       <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px;">
@@ -193,7 +193,7 @@ textarea{resize:vertical;min-height:75px;line-height:1.6;}
         </div>
       </div>
     </div>
-
+ 
     <!-- CONFIGURACIÓN -->
     <div class="tab" id="tab-config">
       <div class="config-card">
@@ -215,10 +215,10 @@ textarea{resize:vertical;min-height:75px;line-height:1.6;}
         </div>
       </div>
     </div>
-
+ 
   </div>
 </div>
-
+ 
 <script>
 const JIRA_DEFAULT  = 'https://vip2picallex.atlassian.net';
 const PROJECT_DEFAULT = 'PCS';
@@ -231,20 +231,20 @@ const TIPOS         = {
   adicion: {label:'Adición de nuevos números', sla:48},
   alta:    {label:'Alta de servicios',         sla:24}
 };
-
+ 
 let state = {
   rotIdx:    JSON.parse(localStorage.getItem('kas_rot')    ||'{"cambio":0,"adicion":0,"alta":0}'),
   historial: JSON.parse(localStorage.getItem('kas_hist')   ||'[]'),
   counts:    JSON.parse(localStorage.getItem('kas_counts') ||'{"Candela Lourenco Gorosito":0,"Milagros Delfino":0,"Augusto Kohler":0}'),
   creadosHoy:0
 };
-
+ 
 function saveState(){
   localStorage.setItem('kas_rot',    JSON.stringify(state.rotIdx));
   localStorage.setItem('kas_hist',   JSON.stringify(state.historial));
   localStorage.setItem('kas_counts', JSON.stringify(state.counts));
 }
-
+ 
 function getConfig(){
   return {
     instance: localStorage.getItem('kas_instance')||JIRA_DEFAULT,
@@ -253,7 +253,7 @@ function getConfig(){
     project:  localStorage.getItem('kas_project') ||PROJECT_DEFAULT
   };
 }
-
+ 
 // ── Llamadas a Jira SIEMPRE pasan por /api (Netlify Function) ─────────────
 async function jiraFetch(path, method='GET', body=null){
   const cfg    = getConfig();
@@ -267,10 +267,10 @@ async function jiraFetch(path, method='GET', body=null){
     }
   };
   if(body) opts.body = JSON.stringify(body);
-  const res = await fetch(`/api?path=${encodeURIComponent(path)}`, opts);
+  const res = await fetch(`/.netlify/functions/jira?path=${encodeURIComponent(path)}`, opts);
   return res;
 }
-
+ 
 function guardarConfig(){
   const instance = document.getElementById('cfg-instance').value.trim().replace(/\/$/,'');
   const email    = document.getElementById('cfg-email').value.trim();
@@ -284,7 +284,7 @@ function guardarConfig(){
   showToast('Configuración guardada. Cargando tickets...','success');
   setTimeout(loadTickets,500);
 }
-
+ 
 async function testConexion(){
   const cfg    = getConfig();
   const result = document.getElementById('cfg-result');
@@ -306,20 +306,20 @@ async function testConexion(){
     setConnected(false);
   }
 }
-
+ 
 function setConnected(ok, name=''){
   const dot = document.getElementById('dot-status');
   const txt = document.getElementById('jira-status-text');
   if(ok){ dot.className='dot'; txt.textContent=`PCS conectado${name?' · '+name:''}`; }
   else  { dot.className='dot dot-off'; txt.textContent='Error de conexión — ir a Configuración'; }
 }
-
+ 
 function fmt(ts){return new Date(ts).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
 function fmtShort(ts){return new Date(ts).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
 function horasDesde(ts){return(Date.now()-new Date(ts).getTime())/3600000;}
 function slaRatio(hs,sla){return Math.min(1,hs/sla);}
 function slaColor(r){return r>=1?'var(--red)':r>=0.75?'var(--amber)':'var(--green)';}
-
+ 
 function personaIdx(n){
   if(!n) return -1;
   const s=n.toLowerCase();
@@ -362,7 +362,7 @@ function showTab(name,btn){
   if(btn) btn.classList.add('active');
   if(name==='nuevo') document.getElementById('f-fecha').value=fmt(Date.now());
 }
-
+ 
 function renderRotacion(){
   document.getElementById('rot-display').innerHTML=Object.entries(TIPOS).map(([key,t])=>{
     const cur=state.rotIdx[key];
@@ -373,7 +373,7 @@ function renderRotacion(){
     return `<div class="rot-row"><div class="rot-type">${t.label}</div><div class="rot-pills">${pills}</div></div>`;
   }).join('');
 }
-
+ 
 function updateRotacion(){
   const tipo=document.getElementById('f-tipo').value;
   const av=document.getElementById('f-av');
@@ -383,7 +383,7 @@ function updateRotacion(){
   av.className='av '+AV_CLASS[idx];av.style.cssText='width:20px;height:20px;font-size:9px;';av.textContent=AV_INI[idx];
   txt.textContent='Le toca a: '+PERSONAS_CORTO[idx];txt.style.color='var(--text)';
 }
-
+ 
 async function loadTickets(){
   const cfg=getConfig();
   if(!cfg.email||!cfg.token){
@@ -409,7 +409,7 @@ async function loadTickets(){
     setConnected(false);
   }
 }
-
+ 
 function renderTickets(tickets){
   const tbody=document.getElementById('tickets-tbody');
   const riesgo=tickets.filter(t=>slaRatio(horasDesde(t.created),TIPOS[detectTipo(t.summary)]?.sla||72)>=0.75);
@@ -438,7 +438,7 @@ function renderTickets(tickets){
     </tr>`;
   }).join('');
 }
-
+ 
 function renderAlertas(riesgo){
   const wrap=document.getElementById('alertas-wrap');
   const cfg=getConfig();
@@ -459,7 +459,7 @@ function renderAlertas(riesgo){
     </div>`;
   }).join('');
 }
-
+ 
 async function crearTicket(){
   const cfg=getConfig();
   const tipo=document.getElementById('f-tipo').value;
@@ -504,7 +504,7 @@ async function crearTicket(){
   }catch(e){errEl.textContent=`Error: ${e.message}`;errEl.style.display='block';showToast('No se pudo crear el ticket','error');}
   btn.disabled=false;btn.textContent='Crear en Jira PCS';
 }
-
+ 
 function limpiarForm(){
   ['f-tipo','f-cliente','f-detalle','f-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('f-asignado-text').textContent='Seleccioná un tipo';
@@ -514,7 +514,7 @@ function limpiarForm(){
   document.getElementById('f-av').style.cssText='width:20px;height:20px;font-size:9px;background:var(--border);';
   document.getElementById('f-error').style.display='none';
 }
-
+ 
 function renderHistorial(){
   const tbody=document.getElementById('historial-tbody');
   const c=state.counts;
@@ -535,7 +535,7 @@ function renderHistorial(){
     </tr>`;
   }).join('');
 }
-
+ 
 // INIT
 const cfg=getConfig();
 if(cfg.instance) document.getElementById('cfg-instance').value=cfg.instance;
@@ -548,3 +548,4 @@ setInterval(loadTickets,120000);
 </script>
 </body>
 </html>
+ 
