@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KAS Ops — Picallex Customer Service</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2334;--border:#2a3050;
+  --accent:#4f7fff;--accent2:#7b5ea7;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+  --text:#e8eaf0;--text2:#8b92a8;--text3:#4a5168;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --radius:10px;--radius-lg:16px;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13px;min-height:100vh;}
+.app{display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:54px;}
+.logo{font-size:15px;font-weight:600;letter-spacing:-.02em;}
+.logo span{color:var(--accent);}
+.jira-badge{display:flex;align-items:center;gap:5px;background:rgba(79,127,255,.12);border:1px solid rgba(79,127,255,.25);border-radius:99px;padding:3px 12px;font-size:11px;color:var(--accent);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+.dot-off{background:var(--red);animation:none;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.user-chip{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:4px 12px 4px 4px;font-size:12px;}
+.av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;}
+.av-del{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.av-ca{background:rgba(79,127,255,.2);color:var(--accent);}
+.av-mi{background:rgba(245,158,11,.2);color:var(--amber);}
+.av-au{background:rgba(34,197,94,.2);color:var(--green);}
+.nav{display:flex;gap:2px;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--border);}
+.nav-btn{background:none;border:none;padding:11px 16px;font-size:12px;font-family:var(--font);color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-weight:500;}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.nav-btn:hover:not(.active){color:var(--text);}
+.main{flex:1;padding:24px;max-width:1100px;margin:0 auto;width:100%;}
+.tab{display:none;}
+.tab.active{display:block;}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.metric-val{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;}
+.metric-lbl{font-size:11px;color:var(--text2);margin-top:4px;}
+.metric-sub{font-size:10px;color:var(--text3);margin-top:3px;}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px;}
+.table-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);}
+.table-title{font-size:13px;font-weight:600;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;padding:9px 16px;color:var(--text3);font-weight:500;font-size:11px;border-bottom:1px solid var(--border);background:var(--surface2);}
+td{padding:11px 16px;border-bottom:1px solid rgba(42,48,80,.5);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.empty{text-align:center;padding:36px;color:var(--text3);font-size:12px;}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;}
+.badge-blue{background:rgba(79,127,255,.15);color:#7ba7ff;}
+.badge-amber{background:rgba(245,158,11,.15);color:#fbbf24;}
+.badge-red{background:rgba(239,68,68,.15);color:#f87171;}
+.badge-green{background:rgba(34,197,94,.15);color:#4ade80;}
+.badge-gray{background:rgba(139,146,168,.1);color:var(--text2);}
+.sla-wrap{width:72px;height:4px;background:var(--border);border-radius:99px;}
+.sla-fill{height:4px;border-radius:99px;}
+.alert-card{border-left:3px solid;border-radius:0 var(--radius) var(--radius) 0;padding:11px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.alert-crit{border-color:var(--red);background:rgba(239,68,68,.08);}
+.alert-warn{border-color:var(--amber);background:rgba(245,158,11,.08);}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;max-width:640px;}
+.form-body{padding:20px;display:flex;flex-direction:column;gap:16px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:11px;color:var(--text2);font-weight:500;}
+.req{color:var(--red);}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:12px;color:var(--text);font-family:var(--font);width:100%;transition:border-color .15s;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);}
+input:disabled{opacity:.4;cursor:not-allowed;}
+select option{background:var(--surface2);}
+textarea{resize:vertical;min-height:75px;line-height:1.6;}
+.next-chip{background:rgba(79,127,255,.06);border:1px solid rgba(79,127,255,.2);border-radius:var(--radius);padding:9px 12px;font-size:12px;color:var(--accent);display:flex;align-items:center;gap:8px;min-height:38px;}
+.btn{border:none;border-radius:var(--radius);padding:9px 20px;font-size:12px;font-family:var(--font);font-weight:500;cursor:pointer;transition:all .15s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{opacity:.85;}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);}
+.btn-sm{padding:4px 11px;font-size:11px;border-radius:6px;}
+.btn-link{background:none;border:none;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--font);}
+.rot-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(42,48,80,.4);}
+.rot-row:last-child{border-bottom:none;}
+.rot-type{font-size:12px;color:var(--text2);min-width:170px;}
+.rot-pills{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.rot-pill{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:4px 10px;font-size:11px;color:var(--text2);}
+.rot-pill.active{border-color:var(--accent);background:rgba(79,127,255,.1);color:var(--accent);font-weight:500;}
+.toast{position:fixed;top:20px;right:20px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;font-size:12px;display:none;z-index:1000;max-width:300px;}
+.toast.show{display:block;animation:slideIn .2s ease;}
+.toast.success{border-color:rgba(34,197,94,.4);}
+.toast.error{border-color:rgba(239,68,68,.4);}
+@keyframes slideIn{from{opacity:0;transform:translateX(12px);}to{opacity:1;transform:translateX(0);}}
+.tag-pcs{display:inline-flex;align-items:center;background:rgba(79,127,255,.1);border:1px solid rgba(79,127,255,.2);border-radius:5px;padding:2px 7px;font-family:var(--mono);font-size:11px;color:var(--accent);}
+.info-banner{background:rgba(79,127,255,.06);border:1px solid rgba(79,127,255,.15);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6;}
+.config-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;max-width:520px;margin-bottom:16px;}
+.config-body{padding:20px;display:flex;flex-direction:column;gap:14px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="toast" id="toast"></div>
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div class="logo">KAS <span>Ops</span></div>
+      <div class="jira-badge"><div class="dot" id="dot-status"></div><span id="jira-status-text">Conectando...</span></div>
+    </div>
+    <div class="user-chip"><div class="av av-del">DE</div><span style="font-size:12px;">Delfina</span></div>
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="showTab('dashboard',this)">Dashboard</button>
+    <button class="nav-btn" onclick="showTab('nuevo',this)">Nuevo ticket</button>
+    <button class="nav-btn" onclick="showTab('historial',this)">Historial</button>
+    <button class="nav-btn" onclick="showTab('config',this)">Configuración</button>
+  </div>
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="tab active" id="tab-dashboard">
+      <div class="metrics">
+        <div class="metric"><div class="metric-val" id="m-activos">—</div><div class="metric-lbl">Tickets activos</div><div class="metric-sub">en PCS/Jira</div></div>
+        <div class="metric"><div class="metric-val" id="m-riesgo" style="color:var(--red);">—</div><div class="metric-lbl">En riesgo SLA</div></div>
+        <div class="metric"><div class="metric-val" id="m-curso" style="color:var(--amber);">—</div><div class="metric-lbl">En curso</div></div>
+        <div class="metric"><div class="metric-val" id="m-creados" style="color:var(--green);">0</div><div class="metric-lbl">Creados hoy</div><div class="metric-sub">desde esta app</div></div>
+      </div>
+      <div id="alertas-wrap"></div>
+      <div class="table-wrap">
+        <div class="table-header"><div class="table-title">Próximo en rotación</div><div style="font-size:11px;color:var(--text3);">Cande · Mila · Augusto</div></div>
+        <div style="padding:4px 18px 10px;" id="rot-display"></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header"><div class="table-title">Tickets activos en PCS</div><button class="btn btn-ghost btn-sm" onclick="loadTickets()">↻ Actualizar</button></div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th style="width:95px;">ID Jira</th><th style="width:110px;">Tipo</th><th style="width:120px;">Asignado</th><th>Cliente</th><th style="width:80px;">SLA</th><th style="width:120px;">Estado</th><th style="width:55px;"></th></tr></thead>
+            <tbody id="tickets-tbody"><tr><td colspan="7" class="empty">Configurá tu API Token para ver los tickets.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- NUEVO TICKET -->
+    <div class="tab" id="tab-nuevo">
+      <div class="form-card">
+        <div class="table-header"><div class="table-title">Crear ticket en Jira PCS</div><div class="jira-badge" style="font-size:10px;"><div class="dot"></div>vip2picallex.atlassian.net</div></div>
+        <div class="form-body">
+          <div class="info-banner">Trazabilidad automática: todos los tickets se crean bajo <strong style="color:var(--text);">Delfina</strong> en el proyecto <strong style="color:var(--accent);">PCS</strong> con rotación automática.</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tipo de gestión <span class="req">*</span></label>
+              <select id="f-tipo" onchange="updateRotacion()">
+                <option value="">Seleccioná...</option>
+                <option value="cambio">Cambio de números</option>
+                <option value="adicion">Adición de nuevos números</option>
+                <option value="alta">Alta de servicios</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Asignado a (rotación automática)</label>
+              <div class="next-chip"><div class="av" id="f-av" style="width:20px;height:20px;font-size:9px;background:var(--border);"></div><span id="f-asignado-text" style="color:var(--text3);">Seleccioná un tipo</span></div>
+            </div>
+            <div class="form-group"><label>Derivado por</label><input value="Delfina" disabled></div>
+            <div class="form-group"><label>Fecha y hora</label><input id="f-fecha" disabled></div>
+            <div class="form-group full"><label>Cliente / cuenta <span class="req">*</span></label><input id="f-cliente" placeholder="Nombre del cliente o empresa"></div>
+            <div class="form-group full"><label>Detalle de la solicitud <span class="req">*</span></label><textarea id="f-detalle" placeholder="Describí la solicitud con el mayor detalle posible..."></textarea></div>
+            <div class="form-group full"><label>Observaciones</label><textarea id="f-obs" placeholder="Condiciones especiales, bloqueos, horarios..." style="min-height:55px;"></textarea></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="btn-crear" onclick="crearTicket()">Crear en Jira PCS</button>
+            <button class="btn btn-ghost" onclick="limpiarForm()">Limpiar</button>
+            <div id="f-error" style="font-size:11px;color:var(--red);display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="tab" id="tab-historial">
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px;">
+        <div class="metric"><div class="metric-val" id="h-ca">0</div><div class="metric-lbl">Tickets Cande</div></div>
+        <div class="metric"><div class="metric-val" id="h-mi">0</div><div class="metric-lbl">Tickets Mila</div></div>
+        <div class="metric"><div class="metric-val" id="h-au">0</div><div class="metric-lbl">Tickets Augusto</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header"><div class="table-title">Historial de derivaciones — Delfina</div></div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th style="width:95px;">ID Jira</th><th style="width:110px;">Tipo</th><th style="width:120px;">Asignado</th><th>Cliente</th><th style="width:120px;">Derivado</th><th style="width:80px;">Estado</th></tr></thead>
+            <tbody id="historial-tbody"><tr><td colspan="6" class="empty">Los tickets creados desde esta app aparecen aquí.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURACIÓN -->
+    <div class="tab" id="tab-config">
+      <div class="config-card">
+        <div class="table-header"><div class="table-title">Conexión con Jira</div></div>
+        <div class="config-body">
+          <div class="info-banner">Generá tu API Token en <strong style="color:var(--text);">id.atlassian.com → Security → API tokens → Create API token</strong>. Copialo antes de cerrar — solo se muestra una vez.</div>
+          <div class="form-group"><label>Instancia de Atlassian</label><input id="cfg-instance" placeholder="https://tuinstancia.atlassian.net"></div>
+          <div class="form-group"><label>Email de tu cuenta Jira</label><input id="cfg-email" placeholder="tu@email.com"></div>
+          <div class="form-group"><label>API Token</label><input id="cfg-token" type="password" placeholder="Pegá tu token aquí"></div>
+          <div class="form-group"><label>Clave del proyecto</label><input id="cfg-project" placeholder="PCS"></div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="guardarConfig()">Guardar y conectar</button>
+            <button class="btn btn-ghost" onclick="testConexion()">Probar conexión</button>
+          </div>
+          <div id="cfg-result" style="font-size:12px;display:none;padding:8px 12px;border-radius:var(--radius);margin-top:4px;"></div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.6;background:var(--surface2);border-radius:var(--radius);padding:10px 12px;">
+            La configuración se guarda en tu navegador. No se sube a ningún servidor externo. Cada usuario configura sus propias credenciales en su dispositivo.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const JIRA_DEFAULT  = 'https://vip2picallex.atlassian.net';
+const PROJECT_DEFAULT = 'PCS';
+const PERSONAS      = ['Candela Lourenco Gorosito','Milagros Delfino','Augusto Kohler'];
+const PERSONAS_CORTO= ['Cande','Mila','Augusto'];
+const AV_CLASS      = ['av-ca','av-mi','av-au'];
+const AV_INI        = ['CA','MI','AU'];
+const TIPOS         = {
+  cambio:  {label:'Cambio de números',         sla:72},
+  adicion: {label:'Adición de nuevos números', sla:48},
+  alta:    {label:'Alta de servicios',         sla:24}
+};
+
+let state = {
+  rotIdx:    JSON.parse(localStorage.getItem('kas_rot')    ||'{"cambio":0,"adicion":0,"alta":0}'),
+  historial: JSON.parse(localStorage.getItem('kas_hist')   ||'[]'),
+  counts:    JSON.parse(localStorage.getItem('kas_counts') ||'{"Candela Lourenco Gorosito":0,"Milagros Delfino":0,"Augusto Kohler":0}'),
+  creadosHoy:0
+};
+
+function saveState(){
+  localStorage.setItem('kas_rot',    JSON.stringify(state.rotIdx));
+  localStorage.setItem('kas_hist',   JSON.stringify(state.historial));
+  localStorage.setItem('kas_counts', JSON.stringify(state.counts));
+}
+
+function getConfig(){
+  return {
+    instance: localStorage.getItem('kas_instance')||JIRA_DEFAULT,
+    email:    localStorage.getItem('kas_email')   ||'',
+    token:    localStorage.getItem('kas_token')   ||'',
+    project:  localStorage.getItem('kas_project') ||PROJECT_DEFAULT
+  };
+}
+
+// ── Llamadas a Jira SIEMPRE pasan por /api (Netlify Function) ─────────────
+async function jiraFetch(path, method='GET', body=null){
+  const cfg    = getConfig();
+  const base64 = btoa(`${cfg.email}:${cfg.token}`);
+  const opts   = {
+    method,
+    headers:{
+      'Authorization': `Basic ${base64}`,
+      'Content-Type':  'application/json',
+      'X-Jira-Instance': cfg.instance
+    }
+  };
+  if(body) opts.body = JSON.stringify(body);
+  const res = await fetch(`/api?path=${encodeURIComponent(path)}`, opts);
+  return res;
+}
+
+function guardarConfig(){
+  const instance = document.getElementById('cfg-instance').value.trim().replace(/\/$/,'');
+  const email    = document.getElementById('cfg-email').value.trim();
+  const token    = document.getElementById('cfg-token').value.trim();
+  const project  = document.getElementById('cfg-project').value.trim();
+  if(!email||!token){showToast('Completá email y token','error');return;}
+  localStorage.setItem('kas_instance', instance||JIRA_DEFAULT);
+  localStorage.setItem('kas_email',    email);
+  localStorage.setItem('kas_token',    token);
+  localStorage.setItem('kas_project',  project||PROJECT_DEFAULT);
+  showToast('Configuración guardada. Cargando tickets...','success');
+  setTimeout(loadTickets,500);
+}
+
+async function testConexion(){
+  const cfg    = getConfig();
+  const result = document.getElementById('cfg-result');
+  if(!cfg.email||!cfg.token){result.style.display='block';result.style.background='rgba(239,68,68,.1)';result.style.color='var(--red)';result.textContent='Completá email y token primero.';return;}
+  result.style.display='block';result.style.color='var(--text2)';result.style.background='var(--surface2)';result.textContent='Probando conexión...';
+  try{
+    const res  = await jiraFetch('/rest/api/3/myself');
+    const data = await res.json();
+    if(res.ok){
+      result.style.background='rgba(34,197,94,.1)';result.style.color='var(--green)';
+      result.textContent=`✓ Conexión exitosa — ${data.displayName}`;
+      setConnected(true, data.displayName);
+    } else {
+      throw new Error(`HTTP ${res.status} — ${data.message||'Credenciales incorrectas'}`);
+    }
+  }catch(e){
+    result.style.background='rgba(239,68,68,.1)';result.style.color='var(--red)';
+    result.textContent=`Error: ${e.message}`;
+    setConnected(false);
+  }
+}
+
+function setConnected(ok, name=''){
+  const dot = document.getElementById('dot-status');
+  const txt = document.getElementById('jira-status-text');
+  if(ok){ dot.className='dot'; txt.textContent=`PCS conectado${name?' · '+name:''}`; }
+  else  { dot.className='dot dot-off'; txt.textContent='Error de conexión — ir a Configuración'; }
+}
+
+function fmt(ts){return new Date(ts).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function fmtShort(ts){return new Date(ts).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
+function horasDesde(ts){return(Date.now()-new Date(ts).getTime())/3600000;}
+function slaRatio(hs,sla){return Math.min(1,hs/sla);}
+function slaColor(r){return r>=1?'var(--red)':r>=0.75?'var(--amber)':'var(--green)';}
+
+function personaIdx(n){
+  if(!n) return -1;
+  const s=n.toLowerCase();
+  if(s.includes('candela')||s.includes('lourenco')) return 0;
+  if(s.includes('milagros')||s.includes('delfino')) return 1;
+  if(s.includes('augusto')||s.includes('kohler'))   return 2;
+  return -1;
+}
+function detectTipo(summary){
+  const s=(summary||'').toLowerCase();
+  if(s.includes('alta')||s.includes('nueva cuenta')||s.includes('activac')||s.includes('onboard')) return 'alta';
+  if(s.includes('adici')||s.includes('upgrade')||s.includes('agreg')||s.includes('sumar')) return 'adicion';
+  return 'cambio';
+}
+function extractCliente(summary){
+  const m=summary.match(/[|—–](.*)/);
+  return m?m[1].trim():summary.substring(0,35);
+}
+function estadoBadge(s){
+  const sl=(s||'').toLowerCase();
+  if(['done','hecho','cerrado','resolved'].some(x=>sl.includes(x))) return 'badge-green';
+  if(sl.includes('bloq')||sl.includes('block')) return 'badge-red';
+  if(sl.includes('curso')||sl.includes('progress')) return 'badge-blue';
+  return 'badge-gray';
+}
+function tipoBadge(tipo){
+  if(tipo==='alta')    return '<span class="badge badge-red">Alta</span>';
+  if(tipo==='adicion') return '<span class="badge badge-amber">Adición</span>';
+  return '<span class="badge badge-blue">Cambio</span>';
+}
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  setTimeout(()=>{t.className='toast';},3500);
+}
+function showTab(name,btn){
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(name==='nuevo') document.getElementById('f-fecha').value=fmt(Date.now());
+}
+
+function renderRotacion(){
+  document.getElementById('rot-display').innerHTML=Object.entries(TIPOS).map(([key,t])=>{
+    const cur=state.rotIdx[key];
+    const pills=PERSONAS_CORTO.map((p,i)=>`
+      <div class="rot-pill${i===cur?' active':''}">
+        <div class="av ${AV_CLASS[i]}" style="width:18px;height:18px;font-size:8px;">${AV_INI[i]}</div>${p}
+      </div>`).join('<span style="font-size:10px;color:var(--text3);">›</span>');
+    return `<div class="rot-row"><div class="rot-type">${t.label}</div><div class="rot-pills">${pills}</div></div>`;
+  }).join('');
+}
+
+function updateRotacion(){
+  const tipo=document.getElementById('f-tipo').value;
+  const av=document.getElementById('f-av');
+  const txt=document.getElementById('f-asignado-text');
+  if(!tipo){av.style.cssText='width:20px;height:20px;font-size:9px;background:var(--border);';av.textContent='';txt.textContent='Seleccioná un tipo';txt.style.color='var(--text3)';return;}
+  const idx=state.rotIdx[tipo];
+  av.className='av '+AV_CLASS[idx];av.style.cssText='width:20px;height:20px;font-size:9px;';av.textContent=AV_INI[idx];
+  txt.textContent='Le toca a: '+PERSONAS_CORTO[idx];txt.style.color='var(--text)';
+}
+
+async function loadTickets(){
+  const cfg=getConfig();
+  if(!cfg.email||!cfg.token){
+    document.getElementById('tickets-tbody').innerHTML='<tr><td colspan="7" class="empty">Configurá tu API Token en la pestaña <strong>Configuración</strong>.</td></tr>';
+    setConnected(false);return;
+  }
+  document.getElementById('tickets-tbody').innerHTML='<tr><td colspan="7" class="empty">Cargando tickets desde Jira PCS...</td></tr>';
+  try{
+    const jql=encodeURIComponent(`project = ${cfg.project} AND status != Done ORDER BY created DESC`);
+    const res=await jiraFetch(`/rest/api/3/search?jql=${jql}&maxResults=25&fields=summary,status,assignee,created`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data=await res.json();
+    const tickets=(data.issues||[]).map(i=>({
+      id:i.key, summary:i.fields.summary,
+      status:i.fields.status?.name||'—',
+      assignee:i.fields.assignee?.displayName||null,
+      created:i.fields.created
+    }));
+    renderTickets(tickets);
+    setConnected(true);
+  }catch(e){
+    document.getElementById('tickets-tbody').innerHTML=`<tr><td colspan="7" class="empty">Error: ${e.message}. Verificá la configuración.</td></tr>`;
+    setConnected(false);
+  }
+}
+
+function renderTickets(tickets){
+  const tbody=document.getElementById('tickets-tbody');
+  const riesgo=tickets.filter(t=>slaRatio(horasDesde(t.created),TIPOS[detectTipo(t.summary)]?.sla||72)>=0.75);
+  const enCurso=tickets.filter(t=>(t.status||'').toLowerCase().includes('curso')||(t.status||'').toLowerCase().includes('progress'));
+  document.getElementById('m-activos').textContent=tickets.length;
+  document.getElementById('m-riesgo').textContent=riesgo.length;
+  document.getElementById('m-curso').textContent=enCurso.length;
+  renderAlertas(riesgo);
+  if(!tickets.length){tbody.innerHTML='<tr><td colspan="7" class="empty">No hay tickets activos en PCS.</td></tr>';return;}
+  const cfg=getConfig();
+  tbody.innerHTML=tickets.map(t=>{
+    const tipo=detectTipo(t.summary);
+    const ratio=slaRatio(horasDesde(t.created),TIPOS[tipo]?.sla||72);
+    const pi=personaIdx(t.assignee);
+    const avHtml=pi>=0
+      ?`<div style="display:flex;align-items:center;gap:6px;"><div class="av ${AV_CLASS[pi]}" style="width:22px;height:22px;font-size:9px;">${AV_INI[pi]}</div><span>${PERSONAS_CORTO[pi]}</span></div>`
+      :`<span style="color:var(--text3);">${t.assignee||'Sin asignar'}</span>`;
+    const cliente=extractCliente(t.summary);
+    return `<tr>
+      <td><span class="tag-pcs">${t.id}</span></td>
+      <td>${tipoBadge(tipo)}</td><td>${avHtml}</td>
+      <td style="color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${cliente}">${cliente}</td>
+      <td><div class="sla-wrap"><div class="sla-fill" style="width:${Math.min(100,Math.round(ratio*100))}%;background:${slaColor(ratio)};"></div></div></td>
+      <td><span class="badge ${estadoBadge(t.status)}">${t.status}</span></td>
+      <td><a href="${cfg.instance}/browse/${t.id}" target="_blank" class="btn-link">Ver ↗</a></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAlertas(riesgo){
+  const wrap=document.getElementById('alertas-wrap');
+  const cfg=getConfig();
+  if(!riesgo.length){wrap.innerHTML='';return;}
+  wrap.innerHTML=riesgo.map(t=>{
+    const tipo=detectTipo(t.summary);
+    const hs=horasDesde(t.created);
+    const sla=TIPOS[tipo]?.sla||72;
+    const ratio=slaRatio(hs,sla);
+    const cls=ratio>=1?'alert-crit':'alert-warn';
+    const msg=ratio>=1?`SLA vencido — ${Math.round(hs-sla)}h de demora`:`Faltan ${Math.round(sla-hs)}h para vencer`;
+    return `<div class="alert-card ${cls}">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:${ratio>=1?'var(--red)':'var(--amber)'};">${t.id} — ${msg}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px;">${TIPOS[tipo]?.label||'—'} · ${t.assignee||'Sin asignar'}</div>
+      </div>
+      <a href="${cfg.instance}/browse/${t.id}" target="_blank"><button class="btn btn-ghost btn-sm">Ver en Jira ↗</button></a>
+    </div>`;
+  }).join('');
+}
+
+async function crearTicket(){
+  const cfg=getConfig();
+  const tipo=document.getElementById('f-tipo').value;
+  const cliente=document.getElementById('f-cliente').value.trim();
+  const detalle=document.getElementById('f-detalle').value.trim();
+  const obs=document.getElementById('f-obs').value.trim();
+  const errEl=document.getElementById('f-error');
+  if(!cfg.email||!cfg.token){errEl.textContent='Configurá tu API Token primero.';errEl.style.display='block';return;}
+  if(!tipo||!cliente||!detalle){errEl.textContent='Completá tipo, cliente y detalle.';errEl.style.display='block';return;}
+  errEl.style.display='none';
+  const asignadoNombre=PERSONAS[state.rotIdx[tipo]];
+  const asignadoCorto=PERSONAS_CORTO[state.rotIdx[tipo]];
+  const tipoLabel=TIPOS[tipo].label;
+  const ahora=fmt(Date.now());
+  const summary=`${tipoLabel} | ${cliente}`;
+  const descText=`*Trazabilidad*\n- Proyecto: ${cfg.project}\n- Derivado por: Delfina\n- Fecha derivación: ${ahora}\n\n*Datos de gestión*\n- Tipo: ${tipoLabel}\n- Cliente: ${cliente}\n- Asignado a: ${asignadoNombre}\n- SLA: ${TIPOS[tipo].sla} horas\n\n*Detalle*\n${detalle}\n\n*Observaciones*\n${obs||'—'}\n\n*Historial*\n- ${ahora} — Derivado por Delfina`;
+  const btn=document.getElementById('btn-crear');
+  btn.disabled=true;btn.textContent='Creando en Jira...';
+  try{
+    const res=await jiraFetch('/rest/api/3/issue','POST',{
+      fields:{
+        project:{key:cfg.project},
+        summary,
+        description:{version:1,type:'doc',content:[{type:'paragraph',content:[{type:'text',text:descText}]}]},
+        issuetype:{name:'Tarea'}
+      }
+    });
+    const data=await res.json();
+    if(data.key){
+      state.rotIdx[tipo]=(state.rotIdx[tipo]+1)%3;
+      state.historial.unshift({id:data.key,tipo,tipoLabel,asignado:asignadoNombre,asignadoCorto,cliente,ts:Date.now()});
+      if(state.counts[asignadoNombre]!==undefined) state.counts[asignadoNombre]++;
+      state.creadosHoy++;
+      saveState();renderRotacion();renderHistorial();
+      document.getElementById('m-creados').textContent=state.creadosHoy;
+      limpiarForm();showToast(`✓ ${data.key} creado y asignado a ${asignadoCorto}`,'success');
+      showTab('dashboard',document.querySelectorAll('.nav-btn')[0]);
+      setTimeout(loadTickets,1500);
+    } else {
+      throw new Error(data.errorMessages?.join(', ')||JSON.stringify(data.errors)||'Error desconocido');
+    }
+  }catch(e){errEl.textContent=`Error: ${e.message}`;errEl.style.display='block';showToast('No se pudo crear el ticket','error');}
+  btn.disabled=false;btn.textContent='Crear en Jira PCS';
+}
+
+function limpiarForm(){
+  ['f-tipo','f-cliente','f-detalle','f-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f-asignado-text').textContent='Seleccioná un tipo';
+  document.getElementById('f-asignado-text').style.color='var(--text3)';
+  document.getElementById('f-av').className='av';
+  document.getElementById('f-av').textContent='';
+  document.getElementById('f-av').style.cssText='width:20px;height:20px;font-size:9px;background:var(--border);';
+  document.getElementById('f-error').style.display='none';
+}
+
+function renderHistorial(){
+  const tbody=document.getElementById('historial-tbody');
+  const c=state.counts;
+  document.getElementById('h-ca').textContent=c['Candela Lourenco Gorosito']||0;
+  document.getElementById('h-mi').textContent=c['Milagros Delfino']||0;
+  document.getElementById('h-au').textContent=c['Augusto Kohler']||0;
+  if(!state.historial.length){tbody.innerHTML='<tr><td colspan="6" class="empty">Los tickets creados desde esta app aparecen aquí.</td></tr>';return;}
+  const cfg=getConfig();
+  tbody.innerHTML=state.historial.map(t=>{
+    const pi=personaIdx(t.asignado);
+    const avHtml=pi>=0?`<div style="display:flex;align-items:center;gap:6px;"><div class="av ${AV_CLASS[pi]}" style="width:22px;height:22px;font-size:9px;">${AV_INI[pi]}</div><span>${PERSONAS_CORTO[pi]}</span></div>`:t.asignado;
+    return `<tr>
+      <td><a href="${cfg.instance}/browse/${t.id}" target="_blank" class="btn-link">${t.id} ↗</a></td>
+      <td>${tipoBadge(t.tipo)}</td><td>${avHtml}</td>
+      <td style="color:var(--text2);">${t.cliente}</td>
+      <td style="color:var(--text2);font-size:11px;">${fmtShort(t.ts)}</td>
+      <td><span class="badge badge-green">Creado</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// INIT
+const cfg=getConfig();
+if(cfg.instance) document.getElementById('cfg-instance').value=cfg.instance;
+if(cfg.email)    document.getElementById('cfg-email').value=cfg.email;
+if(cfg.token)    document.getElementById('cfg-token').value=cfg.token;
+if(cfg.project)  document.getElementById('cfg-project').value=cfg.project;
+document.getElementById('f-fecha').value=fmt(Date.now());
+renderRotacion();renderHistorial();loadTickets();
+setInterval(loadTickets,120000);
+</script>
+</body>
+</html>
